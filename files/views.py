@@ -55,6 +55,7 @@ from .models import (
     Playlist,
     PlaylistMedia,
     Tag,
+    Language,
 )
 from .serializers import (
     CategorySerializer,
@@ -66,6 +67,8 @@ from .serializers import (
     PlaylistSerializer,
     SingleMediaSerializer,
     TagSerializer,
+    SubtitleSerializer,
+    LanguageSerializer,
 )
 from .stop_words import STOP_WORDS
 from .tasks import save_user_action
@@ -1423,3 +1426,64 @@ class TaskDetail(APIView):
         # This is not imported!
         # revoke(uid, terminate=True)
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+class LanguagesList(APIView):
+    """List languages"""
+
+    permission_classes = (IsAuthorizedToAdd,)
+
+    @swagger_auto_schema(
+        manual_parameters=[],
+        tags=['Languages'],
+        operation_summary='List languages',
+        operation_description='Lists all languages',
+        responses={200: LanguageSerializer(many=True)},
+    )
+    def get(self, request, format=None):
+        languages = Language.objects.all()
+        serializer = LanguageSerializer(languages, many=True, context={"request": request})
+        return Response(serializer.data)
+
+class SubtilesList(APIView):
+    """Subtiles listings views"""
+
+    permission_classes = (IsAuthorizedToAdd,)
+    parser_classes = (MultiPartParser, FormParser, FileUploadParser)
+
+    # def get_language(self, request):
+    #     languages = Language.objects.all()
+
+
+    @swagger_auto_schema(
+        manual_parameters=[
+            openapi.Parameter(name='friendly_token', type=openapi.TYPE_STRING, in_=openapi.IN_PATH, description='unique identifier', required=True),
+            openapi.Parameter(name="subtitle_file", type=openapi.TYPE_FILE, in_=openapi.IN_FORM, required=True, description="subtitle_file"),
+            openapi.Parameter(name="language_id", type=openapi.TYPE_INTEGER, in_=openapi.IN_FORM, required=False, description="language id of this subtitle"),
+        ],
+        tags=['Subtitles'],
+        operation_summary='Add new Subtitle',
+        operation_description='Adds a new subtitle, for authenticated users',
+        responses={201: openapi.Response('response description', SubtitleSerializer), 401: 'bad request'},
+    )
+    def post(self, request, friendly_token):
+        # Add new subtitle
+        # language_id = request.params.get("language_id", None)
+        language_id = request.data.get("language_id", None)
+        # pprint(f"language_idlanguage_idlanguage_idlanguage_idlanguage_id{language_id}~~~~~~~~~~~~~~")
+        if not language_id:
+            language = Language.objects.first()
+        else:
+            language = Language.objects.filter(id=language_id).first()
+        media = Media.objects.filter(friendly_token=friendly_token).first()
+        if not media:
+            return Response(
+                {"detail": "media does not exist"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        serializer = SubtitleSerializer(data=request.data, context={"request": request})
+        # pprint(f"!serializerserializerserializerserializerserializer~~~~~~~~~~~~~~")
+        if serializer.is_valid():
+            subtitle_file = request.data["subtitle_file"]
+            serializer.save(user=request.user, subtitle_file=subtitle_file, media=media, language=language)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Category, Comment, EncodeProfile, Media, Playlist, Tag
+from .models import Category, Comment, EncodeProfile, Media, Playlist, Tag, Subtitle, Language
 
 # TODO: put them in a more DRY way
 
@@ -242,3 +242,12 @@ class CommentSerializer(serializers.ModelSerializer):
             "media_url",
             "uid",
         )
+class SubtitleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subtitle
+        fields = ("subtitle_file", )
+
+class LanguageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Language
+        fields = ("id", "code", "title")
