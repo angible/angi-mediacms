@@ -762,7 +762,16 @@ class MediaSearch(APIView):
     parser_classes = (JSONParser,)
 
     @swagger_auto_schema(
-        manual_parameters=[],
+        manual_parameters=[
+            openapi.Parameter(name='c', type=openapi.TYPE_STRING, in_=openapi.IN_QUERY, description='media category', required=False),
+            openapi.Parameter(name='t', type=openapi.TYPE_STRING, in_=openapi.IN_QUERY, description='media tag', required=False),
+            openapi.Parameter(name='q', type=openapi.TYPE_STRING, in_=openapi.IN_QUERY, description='query', required=False),
+            openapi.Parameter(name='author', type=openapi.TYPE_STRING, in_=openapi.IN_QUERY, description='author', required=False),
+            openapi.Parameter(name='media_type', type=openapi.TYPE_STRING, in_=openapi.IN_QUERY, description='media type', required=False),
+            openapi.Parameter(name='upload_date', type=openapi.TYPE_STRING, in_=openapi.IN_QUERY, description='upload date', required=False),
+            openapi.Parameter(name='sort_by', type=openapi.TYPE_STRING, in_=openapi.IN_QUERY, description='sort by', required=False),
+            openapi.Parameter(name='ordering', type=openapi.TYPE_STRING, in_=openapi.IN_QUERY, description='ordering', required=False),
+        ],
         tags=['Search'],
         operation_summary='to_be_written',
         operation_description='to_be_written',
@@ -795,8 +804,8 @@ class MediaSearch(APIView):
             ret = {}
             return Response(ret, status=status.HTTP_200_OK)
 
+        #TODO Whether to show only reviewed media
         media = Media.objects.filter(state="public", is_reviewed=True)
-
         if query:
             # move this processing to a prepare_query function
             query = clean_query(query)
