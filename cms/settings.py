@@ -3,7 +3,8 @@ import os
 from celery.schedules import crontab
 from django.utils.translation import gettext_lazy as _
 
-DEBUG = False
+# DEBUG = False
+DEBUG = True
 
 # PORTAL NAME, this is the portal title and
 # is also shown on several places as emails
@@ -91,14 +92,14 @@ MAX_MEDIA_PER_PLAYLIST = 70
 UPLOAD_MAX_SIZE = 800 * 1024 * 1000 * 5
 
 MAX_CHARS_FOR_COMMENT = 10000  # so that it doesn't end up huge
-TIMESTAMP_IN_TIMEBAR = False  # shows timestamped comments in the timebar for videos
-ALLOW_MENTION_IN_COMMENTS = False  # allowing to mention other users with @ in the comments
+TIMESTAMP_IN_TIMEBAR = True  # shows timestamped comments in the timebar for videos
+ALLOW_MENTION_IN_COMMENTS = True  # allowing to mention other users with @ in the comments
 
 # valid options: content, author
 RELATED_MEDIA_STRATEGY = "content"
 
 # Whether or not to generate a sitemap.xml listing the pages on the site (default: False)
-GENERATE_SITEMAP = False
+GENERATE_SITEMAP = True
 
 USE_I18N = True
 USE_L10N = True
@@ -212,7 +213,7 @@ UPLOAD_DIR = "uploads/"
 CHUNKS_DIR = "chunks/"
 
 # number of files to upload using fineuploader at once
-UPLOAD_MAX_FILES_NUMBER = 100
+UPLOAD_MAX_FILES_NUMBER = 1000
 CONCURRENT_UPLOADS = True
 CHUNKS_DONE_PARAM_NAME = "done"
 FILE_STORAGE = "django.core.files.storage.DefaultStorage"
@@ -499,7 +500,7 @@ if GLOBAL_LOGIN_REQUIRED:
     ]
 
 # if True, only show original, don't perform any action on videos
-DO_NOT_TRANSCODE_VIDEO = False
+DO_NOT_TRANSCODE_VIDEO = False #2025/01/16 Joe revised
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
