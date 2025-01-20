@@ -165,7 +165,8 @@ export function VideoPlayer(props) {
         theSelectedPlaybackSpeed: playerStates.videoPlaybackSpeed || 1,
       },
       props.info,
-      [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
+      // [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2],
+      [0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 4, 8],
       onPlayerStateUpdate,
       onClickNext,
       onClickPrevious
