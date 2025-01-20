@@ -4,6 +4,24 @@ from .models import Category, Comment, EncodeProfile, Media, Playlist, Tag, Subt
 
 # TODO: put them in a more DRY way
 
+class CategorySerializer(serializers.ModelSerializer):
+    user = serializers.ReadOnlyField(source="user.username")
+
+    class Meta:
+        model = Category
+        fields = (
+            "title",
+            "description",
+            "is_global",
+            "media_count",
+            "user",
+            "thumbnail_url",
+        )
+
+class TagSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Tag
+        fields = ("title", "media_count", "thumbnail_url")
 
 class MediaSerializer(serializers.ModelSerializer):
     # to be used in APIs as show related media
@@ -13,6 +31,8 @@ class MediaSerializer(serializers.ModelSerializer):
     thumbnail_url = serializers.SerializerMethodField()
     author_profile = serializers.SerializerMethodField()
     author_thumbnail = serializers.SerializerMethodField()
+    category = CategorySerializer(many=True, read_only=True)
+    tag = TagSerializer(many=True, read_only=True)
 
     def get_url(self, obj):
         return self.context["request"].build_absolute_uri(obj.get_absolute_url())
@@ -76,6 +96,8 @@ class MediaSerializer(serializers.ModelSerializer):
             "featured",
             "user_featured",
             "size",
+            "category",
+            "tag",
         )
 
 
@@ -183,28 +205,6 @@ class EncodeProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = EncodeProfile
         fields = ("name", "extension", "resolution", "codec", "description")
-
-
-class CategorySerializer(serializers.ModelSerializer):
-    user = serializers.ReadOnlyField(source="user.username")
-
-    class Meta:
-        model = Category
-        fields = (
-            "title",
-            "description",
-            "is_global",
-            "media_count",
-            "user",
-            "thumbnail_url",
-        )
-
-
-class TagSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Tag
-        fields = ("title", "media_count", "thumbnail_url")
-
 
 class PlaylistSerializer(serializers.ModelSerializer):
     user = serializers.ReadOnlyField(source="user.username")

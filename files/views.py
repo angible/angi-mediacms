@@ -1,3 +1,4 @@
+import traceback
 from datetime import datetime, timedelta
 
 from django.conf import settings
@@ -450,6 +451,10 @@ class MediaList(APIView):
             openapi.Parameter(name="media_file", in_=openapi.IN_FORM, type=openapi.TYPE_FILE, required=True, description="media_file"),
             openapi.Parameter(name="description", in_=openapi.IN_FORM, type=openapi.TYPE_STRING, required=False, description="description"),
             openapi.Parameter(name="title", in_=openapi.IN_FORM, type=openapi.TYPE_STRING, required=False, description="title"),
+            openapi.Parameter(name="featured", in_=openapi.IN_FORM, type=openapi.TYPE_BOOLEAN, required=False, description="whether this media is featured"),
+            openapi.Parameter(name="category", in_=openapi.IN_FORM, type=openapi.TYPE_STRING, required=False, description="category, seperated by ',' "),
+            openapi.Parameter(name="tag", in_=openapi.IN_FORM, type=openapi.TYPE_STRING, required=False, description="tag, seperated by ','"),
+
         ],
         tags=['Media'],
         operation_summary='Add new Media',
@@ -458,11 +463,35 @@ class MediaList(APIView):
     )
     def post(self, request, format=None):
         # Add new media
+        # https://dev.to/danielcoker/updating-a-many-to-many-relationship-5h2j
+        category = request.data.get("category", None)
+        tag = request.data.get("tag", None)
+        if category:
+            category = category.split(",")
+        if tag:
+            tag = tag.split(",")
         serializer = MediaSerializer(data=request.data, context={"request": request})
-        if serializer.is_valid():
-            media_file = request.data["media_file"]
-            serializer.save(user=request.user, media_file=media_file)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        try:
+            if serializer.is_valid(raise_exception=True):
+                media_file = request.data["media_file"]
+                media_save = serializer.save(user=request.user, media_file=media_file)
+                if category:
+                    for cat in category:
+                        try:
+                            cat_model = Category.objects.get(title=cat)
+                        except Category.DoesNotExist:
+                            cat_model = Category.objects.create(title=cat, user=request.user)
+                        media_save.category.add(cat_model)
+                if tag:
+                    for t in tag:
+                        try:
+                            tag_model = Tag.objects.get(title=t)
+                        except Tag.DoesNotExist:
+                            tag_model = Tag.objects.create(title=t, user=request.user)
+                        media_save.tag.add(tag_model)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            traceback.print_exc()
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
