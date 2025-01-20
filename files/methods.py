@@ -110,6 +110,16 @@ def is_mediacms_manager(user):
         pass
     return manager
 
+def is_superuser(user):
+    """Whether user is MediaCMS manager"""
+
+    superuser = False
+    try:
+        if user.is_superuser:
+            superuser = True
+    except BaseException:
+        pass
+    return superuser
 
 def get_next_state(user, current_state, next_state):
     """Return valid state, given a current and next state

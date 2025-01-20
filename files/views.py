@@ -46,6 +46,7 @@ from .methods import (
     show_recommended_media,
     show_related_media,
     update_user_ratings,
+    is_superuser,
 )
 from .models import (
     Category,
@@ -194,19 +195,19 @@ def edit_media(request):
         form = MediaForm(request.user, request.POST, request.FILES, instance=media)
         if form.is_valid():
             media = form.save()
-            for tag in media.tags.all():
-                media.tags.remove(tag)
-            if form.cleaned_data.get("new_tags"):
-                for tag in form.cleaned_data.get("new_tags").split(","):
-                    tag = get_alphanumeric_only(tag)
-                    tag = tag[:99]
-                    if tag:
-                        try:
-                            tag = Tag.objects.get(title=tag)
-                        except Tag.DoesNotExist:
-                            tag = Tag.objects.create(title=tag, user=request.user)
-                        if tag not in media.tags.all():
-                            media.tags.add(tag)
+            # for tag in media.tags.all():
+            #     media.tags.remove(tag)
+            # if form.cleaned_data.get("new_tags"):
+            #     for tag in form.cleaned_data.get("new_tags").split(","):
+            #         tag = get_alphanumeric_only(tag)
+            #         tag = tag[:99]
+            #         if tag:
+            #             try:
+            #                 tag = Tag.objects.get(title=tag)
+            #             except Tag.DoesNotExist:
+            #                 tag = Tag.objects.create(title=tag, user=request.user)
+            #             if tag not in media.tags.all():
+            #                 media.tags.add(tag)
             messages.add_message(request, messages.INFO, translate_string(request.LANGUAGE_CODE, "Media was edited"))
             return HttpResponseRedirect(media.get_absolute_url())
     else:
@@ -367,13 +368,20 @@ def view_media(request):
 
     context["CAN_DELETE_MEDIA"] = False
     context["CAN_EDIT_MEDIA"] = False
-    context["CAN_DELETE_COMMENTS"] = False
+    context["CAN_DELETE_COMMENTS"] = True
+    context["CAN_DOWNLOAD_VIDEO"] = False
 
     if request.user.is_authenticated:
         if (media.user.id == request.user.id) or is_mediacms_editor(request.user) or is_mediacms_manager(request.user):
             context["CAN_DELETE_MEDIA"] = True
             context["CAN_EDIT_MEDIA"] = True
             context["CAN_DELETE_COMMENTS"] = True
+        if request.user.advancedUser:
+            context["CAN_EDIT_MEDIA"] = True
+        if (media.user.id == request.user.id):
+            context["CAN_DOWNLOAD_VIDEO"] = True
+        elif is_superuser(request.user):
+            context["CAN_DOWNLOAD_VIDEO"] = True
     return render(request, "cms/media.html", context)
 
 

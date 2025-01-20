@@ -1053,7 +1053,8 @@ class Tag(models.Model):
         return True
 
     def save(self, *args, **kwargs):
-        self.title = helpers.get_alphanumeric_only(self.title)
+        # self.title = helpers.get_alphanumeric_only(self.title)
+        self.title = self.title[:99].replace(" ", "") # TODO I don't want to allow spaces in tags
         self.title = self.title[:99]
         super(Tag, self).save(*args, **kwargs)
 
