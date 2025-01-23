@@ -489,14 +489,14 @@ else:
 
 if GLOBAL_LOGIN_REQUIRED:
     # this should go after the AuthenticationMiddleware middleware
-    MIDDLEWARE.insert(5, "login_required.middleware.LoginRequiredMiddleware")
+    MIDDLEWARE.insert(6, "login_required.middleware.LoginRequiredMiddleware")
     LOGIN_REQUIRED_IGNORE_PATHS = [
         r'/accounts/login/$',
         r'/accounts/logout/$',
         r'/accounts/signup/$',
         r'/accounts/password/.*/$',
         r'/accounts/confirm-email/.*/$',
-        r'/api/v[0-9]+/',
+        #        r'/api/v[0-9]+/',
     ]
 
 # if True, only show original, don't perform any action on videos
